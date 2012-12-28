@@ -8,7 +8,7 @@ import slackdom._
 // and show it in a Slick2D app.
 
 import org.newdawn.slick.AppGameContainer
-import org.newdawn.slick.{BasicGame, GameContainer, Graphics, Color}
+import org.newdawn.slick.{GameContainer, Graphics, Color}
 
 object SlackTest extends ReactiveApp {
   val container = new AppGameContainer(new SlackTest, 800, 600, false)
@@ -55,7 +55,7 @@ case class ClockObserver(clockEvents:Events[String]) extends Observing {
 }
 
 
-class SlackTest extends BasicGame("Slack Test") {
+class SlackTest extends SimpleGame("Slack Test") {
   var current = new java.util.Date()
   val clock = Clock()
 

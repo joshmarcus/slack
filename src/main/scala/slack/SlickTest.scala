@@ -17,8 +17,16 @@ object SlackTest extends ReactiveApp {
   container.start
 }
 
-case class Clock extends EventSource[Int](slackdom.owner) {
+// Signal examples
+
+// Signals are event sources with continuously varying values.
+// Example of Var -- externally modifiable Signal.
+case class Clock {
   val sig = Var[String]("")
+
+  // Events generated from our signal
+  val ticks = sig.changes 
+
   var turnNumber = 0
   def clockTick {
     val newDate:String = new java.util.Date().toString
@@ -27,11 +35,22 @@ case class Clock extends EventSource[Int](slackdom.owner) {
   }
 }
 
-case class ConsoleObserver(dateSignal:Var[String]) extends Observing {
+// this doesn't work
+case class Clock2 {
+  val sig = Signal.flow("")(self => {
+    self update (new java.util.Date().toString)
+    self.pause
+  })
+  val ticks = sig.changes
+}
+
+case class ClockObserver(clockEvents:Events[String]) extends Observing {
   var currentTime:String = ""
   schedule { obs } 
   def obs {
-    observe(dateSignal)(timeSignal => currentTime = timeSignal)
+    observe(clockEvents)( timeSignal => { 
+      println(s"observed clock event: ${timeSignal}")
+      currentTime = timeSignal })
   }
 }
 
@@ -39,7 +58,9 @@ case class ConsoleObserver(dateSignal:Var[String]) extends Observing {
 class SlackTest extends BasicGame("Slack Test") {
   var current = new java.util.Date()
   val clock = Clock()
-  val observer = ConsoleObserver(clock.sig)
+
+  // map below is an event combinator from scala.react
+  val observer = ClockObserver(clock.ticks map {"Sig Var test: " + _})
 
   override def init(gc: GameContainer) {
     println("Slack test started.")

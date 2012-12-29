@@ -1,6 +1,6 @@
 package slack
 
-import org.newdawn.slick.{Game,InputListener,Input,GameContainer}
+import org.newdawn.slick.{Game,InputListener,Input => SlickInput,GameContainer}
 /**
  * Basic game implementation
  */
@@ -24,7 +24,7 @@ abstract class SimpleGame(title:String) extends Game with InputListener {
   val controllerButton = Array.ofDim[Boolean](MaxControllers,MaxControllerButtons)
 
 
-	def setInput(input:Input) {	}
+	def setInput(input:SlickInput) {	}
 	
 	def closeRequested() = true
 	

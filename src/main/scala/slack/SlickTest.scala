@@ -55,12 +55,17 @@ case class ClockObserver(clockEvents:Events[String]) extends Observing {
 }
 
 
-class SlackTest extends SimpleGame("Slack Test") {
+class SlackTest extends ReactiveGame("Slack Test") with Observing {
   var current = new java.util.Date()
   val clock = Clock()
 
   // map below is an event combinator from scala.react
   val observer = ClockObserver(clock.ticks map {"Sig Var test: " + _})
+  
+  def obsInput {
+    observe(inputEvents.keyPressed)( event => println("event: " + event))
+  }
+  schedule { obsInput }
 
   override def init(gc: GameContainer) {
     println("Slack test started.")

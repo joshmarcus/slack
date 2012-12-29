@@ -46,7 +46,7 @@ case class Clock2 {
 
 case class ClockObserver(clockEvents:Events[String]) extends Observing {
   var currentTime:String = ""
-  schedule { obs } 
+  slackdom schedule { obs } 
   def obs {
     observe(clockEvents)( timeSignal => { 
       println(s"observed clock event: ${timeSignal}")
@@ -65,7 +65,7 @@ class SlackTest extends ReactiveGame("Slack Test") with Observing {
   def obsInput {
     observe(inputEvents.keyPressed)( event => println("event: " + event))
   }
-  schedule { obsInput }
+  slackdom schedule { obsInput }
 
   override def init(gc: GameContainer) {
     println("Slack test started.")
@@ -75,6 +75,7 @@ class SlackTest extends ReactiveGame("Slack Test") with Observing {
   override def update(gc: GameContainer, delta: Int) {
     current = new java.util.Date()
     clock.clockTick
+    slackdom.engine.runTurn
   }
 
   override def render(gc: GameContainer, g: Graphics) {

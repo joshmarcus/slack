@@ -8,7 +8,10 @@ trait SchedulerModule { self: Domain =>
 
 
   def schedule(r: Runnable) { engine.schedule(r) }
-  def schedule(op: => Unit) { engine.schedule(op) }
+  def schedule(op: => Unit) { 
+    println("scheduling op with engine")
+    engine.schedule(op) 
+  }
 
   /**
    * The scheduler is responsible for scheduling propagation turns. Turns are not necessarily run
@@ -39,19 +42,40 @@ trait SchedulerModule { self: Domain =>
    * A scheduler with a thread-safe API.
    */
   abstract class ThreadSafeScheduler extends Scheduler {
+    private val needsToBeScheduled = new AtomicBoolean(false)
+    private val isRunning = new AtomicBoolean(false)
     private val isScheduled = new AtomicBoolean(false)
 
     private val runnable = new Runnable {
-      def run {
-        // TODO: do we really need to CAS twice?
-        if (isScheduled.compareAndSet(true, false)) engine.runTurn()
+      def run() = {
+        println("3. in run of runnable")
+        if (isRunning.compareAndSet(false,true)) {
+          println("4. isRunnin was false, now is true")
+          println("before runTurn")
+          isRunning.set(false)
+          engine.runTurn()
+          println("after runTurn")
+          //if(needsToBeScheduled.compareAndSet(true,false)) {
+          //  println("needs to be scheduled is now true, so ensuringTurnIsScheduled")
+          //  ensureTurnIsScheduled()
+          //}
+        }
+        println(s" -- in turn runnable: isScheduled: ${isScheduled}")
+        println(s" -- in turn runnable: isRunning: ${isRunning}")
       }
     }
 
     def ensureTurnIsScheduled() {
-      if (isScheduled.compareAndSet(false, true)) {
+      println("1. ensureTurnIsScheduled running")
+      println(s"isScheduled: ${isScheduled}")
+      println(s"isRunning: ${isRunning}")
+      //if (isScheduled.compareAndSet(false, true)) {
+        println("2. isScheduled was false, now is true.  running a new turn.")
         schedule(runnable)
-      }
+      //} else {
+      //  println("isScheduled is true -- needs to be scheduled set to true")
+      //  needsToBeScheduled.set(true)
+      //}
     }
 
     /**

@@ -29,7 +29,7 @@ abstract class Debug[D <: Domain](val domain: D) {
     isInTurn = true
   }
   @elidable(800) def leaveTurn(id: Long) {
-    assert(isInTurn)
+    assert(isInTurn, "Tried to leave a run when not currently in a turn.")
     logLeaveTurn(id)
     isInTurn = false
   }

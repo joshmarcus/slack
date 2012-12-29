@@ -35,9 +35,11 @@ abstract class Domain extends ReactiveModule
     def main() {}
 
     override def main(args: Array[String]) {
-      domain schedule { super.main(args) }
+      //domain schedule { super.main(args) }
       domain.start()
       main()
+      super.main(args)
+      domain.engine.runTurn
     }
   }
 

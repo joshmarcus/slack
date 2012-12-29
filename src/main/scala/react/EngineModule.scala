@@ -76,7 +76,7 @@ abstract class EngineModule { self: Domain =>
       try {
         propagate()
       } catch {
-        case e => uncaughtException(e)
+        case e => { uncaughtException(e) }
       } finally {
         propQueue.clear
         level = 0

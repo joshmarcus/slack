@@ -6,7 +6,7 @@ object slackdom extends SlackDomain
 
 class SlackDomain extends Domain {
   var engine = new Engine
-  val scheduler = new ThreadPoolScheduler
+  val scheduler = new ManualScheduler
+  //val scheduler = new ThreadPoolScheduler
 }
-
 

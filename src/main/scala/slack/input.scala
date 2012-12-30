@@ -19,3 +19,12 @@ case class KeyPressed(key:Int, c: Char) extends Input
  * @param c   The character of the key that was released
  */
 case class KeyReleased(key:Int, c: Char) extends Input
+
+case class MouseMoved(oldx:Int, oldy:Int, newx:Int, newy:Int)
+
+case class MouseDragged(oldx:Int, oldy:Int, newx:Int, newy:Int)
+
+case class MouseClicked(button:Int, x:Int, y:Int, clickCount:Int)
+
+case class MousePressed(button:Int, x:Int, y:Int)
+

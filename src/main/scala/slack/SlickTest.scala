@@ -77,8 +77,15 @@ class SlackTest extends ReactiveGame("Slack Test") with Observing {
   def qInput {
     observe(qHit)(event => println("letter q was pressed"))
   }
+
+
+  def observeMouseEvents {
+    observe(inputEvents.mouse)(e => println(s"mouse event: ${e}"))
+  }
+
   schedule { obsInput }
   schedule { qInput }
+  schedule { observeMouseEvents }
 
   override def init(gc: GameContainer) {
     println("Slack test started.")

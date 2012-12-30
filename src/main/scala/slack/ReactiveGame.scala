@@ -11,6 +11,13 @@ class InputEvents extends EventSource[Input](slackdom.owner) {
 
   val key = keyPressed merge keyReleased
 
+  val mouseMoved = EventSource[MouseMoved]
+  val mouseClicked = EventSource[MouseClicked]
+  val mousePressed = EventSource[MousePressed]
+  val mouseDragged = EventSource[MouseDragged]
+
+  val mouse = mouseMoved merge mouseClicked merge mousePressed merge mouseDragged
+
   val all = key
 }
 
@@ -62,22 +69,30 @@ abstract class ReactiveGame(title:String) extends Game with InputListener {
 	/**
 	 * @see org.newdawn.slick.InputListener#mouseMoved(int, int, int, int)
 	 */
-	def mouseMoved(oldx:Int, oldy:Int, newx:Int, newy:Int) { }
+	def mouseMoved(oldx:Int, oldy:Int, newx:Int, newy:Int) {
+    inputEvents.mouseMoved << MouseMoved(oldx, oldy, newx, newy)
+  }
 
 	/**
 	 * @see org.newdawn.slick.InputListener#mouseDragged(int, int, int, int)
 	 */
-	def mouseDragged(oldx:Int, oldy:Int, newx:Int, newy:Int) { }
+	def mouseDragged(oldx:Int, oldy:Int, newx:Int, newy:Int) {
+    inputEvents.mouseDragged << MouseDragged(oldx, oldy, newx, newy) 
+  }
 	
 	/**
 	 * @see org.newdawn.slick.InputListener#mouseClicked(int, int, int, int)
 	 */
-	def mouseClicked(button:Int, x:Int, y:Int, clickCount:Int) { }
+	def mouseClicked(button:Int, x:Int, y:Int, clickCount:Int) {
+    inputEvents.mouseClicked << MouseClicked(button, x, y, clickCount)
+  }
 	
 	/**
 	 * @see org.newdawn.slick.InputListener#mousePressed(int, int, int)
 	 */
-	def mousePressed(button:Int, x:Int, y:Int) { }
+	def mousePressed(button:Int, x:Int, y:Int) {
+    inputEvents.mousePressed << MousePressed(button, x, y)
+  }
 	
 	/**
 	 * @see org.newdawn.slick.InputListener#controllerButtonPressed(int, int)

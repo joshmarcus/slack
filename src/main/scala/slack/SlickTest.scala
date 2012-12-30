@@ -46,7 +46,9 @@ case class Clock2 {
 
 case class ClockObserver(clockEvents:Events[String]) extends Observing {
   var currentTime:String = ""
-  slackdom schedule { obs } 
+  //TODO: schedule { observe ... } seems unnecessarily wordy.  needs to be combined.
+  // maybe an Observing trait with an implicit domain would help?
+  schedule { obs }
   def obs {
     observe(clockEvents)( timeSignal => { 
       println(s"observed clock event: ${timeSignal}")
@@ -63,9 +65,20 @@ class SlackTest extends ReactiveGame("Slack Test") with Observing {
   val observer = ClockObserver(clock.ticks map {"Sig Var test: " + _})
   
   def obsInput {
-    observe(inputEvents.keyPressed)( event => println("event: " + event))
+    observe(inputEvents.key)( event => println("event: " + event))
   }
-  slackdom schedule { obsInput }
+
+  // mostly just a test of filter, although would be good to create a few
+  // ways to generate quit app events like in the paper and then merge the
+  // event streams.
+  val qHit = inputEvents.keyPressed
+             .filter({ case KeyPressed(code, char) => char == 'q'})
+
+  def qInput {
+    observe(qHit)(event => println("letter q was pressed"))
+  }
+  schedule { obsInput }
+  schedule { qInput }
 
   override def init(gc: GameContainer) {
     println("Slack test started.")

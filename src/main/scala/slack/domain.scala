@@ -8,5 +8,6 @@ class SlackDomain extends Domain {
   var engine = new Engine
   val scheduler = new ManualScheduler
   //val scheduler = new ThreadPoolScheduler
+
 }
 

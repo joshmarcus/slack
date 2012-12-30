@@ -4,13 +4,13 @@ import slackdom._
 
 import org.newdawn.slick.{Game,InputListener,Input => SlickInput,GameContainer}
 
+// User input events.  you wanted 'em ... you got 'em.
 class InputEvents extends EventSource[Input](slackdom.owner) {
-  //val lastKeyPressed = Var[KeyPressed](null)
-  //val keyPressed = lastKeyPressed changes
-
   val keyPressed = EventSource[KeyPressed]
   val keyReleased = EventSource[KeyReleased]
+
   val key = keyPressed merge keyReleased
+
   val all = key
 }
 
@@ -49,7 +49,6 @@ abstract class ReactiveGame(title:String) extends Game with InputListener {
   def init(container:GameContainer):Unit 
 
 	def keyPressed(key:Int, c:Char) { 
-    println(s"keypressed: ${c}")
     inputEvents.keyPressed << KeyPressed(key, c)
   }
 
@@ -57,7 +56,7 @@ abstract class ReactiveGame(title:String) extends Game with InputListener {
 	 * @see org.newdawn.slick.InputListener#keyReleased(int, char)
 	 */
 	def keyReleased(key:Int, c:Char) {
-
+    inputEvents.keyReleased << KeyReleased(key, c)
   }
 
 	/**

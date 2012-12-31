@@ -1,138 +1,128 @@
-package org.newdawn.slick.examples.scroller;
+package slack.examples
 
-import org.newdawn.slick.Animation;
-import org.newdawn.slick.AppGameContainer;
-import org.newdawn.slick.BasicGame;
-import org.newdawn.slick.GameContainer;
-import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Input;
-import org.newdawn.slick.SlickException;
-import org.newdawn.slick.SpriteSheet;
-import org.newdawn.slick.tiled.TiledMap;
-import org.newdawn.slick.util.Log;
+import slack.SimpleGame
+
+import org.newdawn.slick.Animation
+import org.newdawn.slick.AppGameContainer
+import org.newdawn.slick.BasicGame
+import org.newdawn.slick.GameContainer
+import org.newdawn.slick.Graphics
+import org.newdawn.slick.Input
+import org.newdawn.slick.SlickException
+import org.newdawn.slick.SpriteSheet
+import org.newdawn.slick.tiled.TiledMap
+import org.newdawn.slick.util.Log
 
 /**
- * An example to show scrolling around a tilemap smoothly. This seems to have caused confusion
- * a couple of times so here's "a" way to do it.
+ * An example to show scrolling around a tilemap smoothly. 
  *
- * @author kevin
+ * Currently a literal Scala port of kevin's Slick2D example.
+ *
+ * Next todo: encapsulate mutable state. 
  */
-public class Scroller extends BasicGame {
+class Scroller extends SimpleGame("Scroller") {
 	/** The size of the tank sprite - used for finding the centre */
-	private static final int TANK_SIZE = 32;
+	val TankSize = 32
 	/** The size of the tiles - used to determine the amount to draw */
-	private static final int TILE_SIZE = 32;
+	val TileSize = 32
 	/** The speed the tank moves at */
-	private static final float TANK_MOVE_SPEED = 0.003f;
+	val TankMoveSpeed:Float = 0.003f
 	/** The speed the tank rotates at */
-	private static final float TANK_ROTATE_SPEED = 0.2f;
+	val TankRotateSpeed:Float = 0.2f
 	
 	/** The player's x position in tiles */
-	private float playerX = 15;
+	var playerX:Float = 15
 	/** The player's y position in tiles */
-	private float playerY = 16;
+	var playerY:Float = 16
 	
 	/** The width of the display in tiles */
-	private int widthInTiles;
+	var widthInTiles = 0 
 	/** The height of the display in tiles */
-	private int heightInTiles;
+	var heightInTiles = 0
 	
 	/** The offset from the centre of the screen to the top edge in tiles */
-	private int topOffsetInTiles;
+	var topOffsetInTiles = 0
 	/** The offset from the centre of the screen to the left edge in tiles */
-	private int leftOffsetInTiles;
+	var leftOffsetInTiles = 0
 	
 	/** The map that we're going to drive around */
-	private TiledMap map;
+	var map:TiledMap = null
 	
 	/** The animation representing the player's tank */
-	private Animation player;
+	var player:Animation = null
 	
 	/** The angle the player is facing */
-	private float ang;
+	var ang:Float = 0
 	/** The x component of the movement vector */
-	private float dirX;
+	var dirX:Float = 0
 	/** The y component of themovement vector */
-	private float dirY;
+	var dirY:Float = 0
 	
 	/** The collision map indicating which tiles block movement - generated based on tile properties */
-	private boolean[][] blocked;
+	var blockedTiles:Array[Array[Boolean]] = null 
 	
-	/**
-	 * Scroller example
-	 */
-	public Scroller() {
-		super("Scroller");
-	}
-	
-	/**
-	 * @see org.newdawn.slick.BasicGame#init(org.newdawn.slick.GameContainer)
-	 */
-	public void init(GameContainer container) throws SlickException {
+	def init(container:GameContainer) {
 		// load the sprites and tiles, note that underneath the texture
 		// will be shared between the sprite sheet and tilemap
-		SpriteSheet sheet = new SpriteSheet("src/main/resources/scroller/sprites.png",32,32);
+		val sheet = new SpriteSheet("src/main/resources/scroller/sprites.png",32,32)
+
 		// load the tilemap created the TileD tool 
-		map = new TiledMap("src/main/resources/scroller/map.tmx");
+		map = new TiledMap("src/main/resources/scroller/map.tmx")
 		
 		// build a collision map based on tile properties in the TileD map
-		blocked = new boolean[map.getWidth()][map.getHeight()];
-		for (int x=0;x<map.getWidth();x++) {
-			for (int y=0;y<map.getHeight();y++) {
-				int tileID = map.getTileId(x, y, 0);
-				String value = map.getTileProperty(tileID, "blocked", "false");
-				if ("true".equals(value)) {
-					blocked[x][y] = true;
-				}
-			}
-		}
+		blockedTiles = Array.ofDim[Boolean](map.getWidth(),map.getHeight());
+		for (x <- 0 until map.getWidth();
+         y <- 0 until map.getHeight()) {
+      val tileID = map.getTileId(x, y, 0);
+      val value = map.getTileProperty(tileID, "blocked", "false")
+      if (value == "true") {
+        blockedTiles(x)(y) = true
+      }
+	  }
 		
 		// caculate some layout values for rendering the tilemap. How many tiles
 		// do we need to render to fill the screen in each dimension and how far is
 		// it from the centre of the screen
-		widthInTiles = container.getWidth() / TILE_SIZE;
-		heightInTiles = container.getHeight() / TILE_SIZE;
-		topOffsetInTiles = heightInTiles / 2;
-		leftOffsetInTiles = widthInTiles / 2;
+		widthInTiles = container.getWidth() / TileSize
+		heightInTiles = container.getHeight() / TileSize
+		topOffsetInTiles = heightInTiles / 2
+		leftOffsetInTiles = widthInTiles / 2
 		
 		// create the player sprite based on a set of sprites from the sheet loaded
 		// above (tank tracks moving)
-		player = new Animation();
-		for (int frame=0;frame<7;frame++) {
-			player.addFrame(sheet.getSprite(frame,1), 150);
+		player = new Animation()
+		for (frame <- 0 until 7) {
+			player.addFrame(sheet.getSprite(frame,1), 150)
 		}
-		player.setAutoUpdate(false);
+		player.setAutoUpdate(false)
 
 		// update the vector of movement based on the initial angle
-		updateMovementVector();
+		updateMovementVector()
 		
-		Log.info("Window Dimensions in Tiles: "+widthInTiles+"x"+heightInTiles);
+		Log.info("Window Dimensions in Tiles: "+widthInTiles+"x"+heightInTiles)
 	}
 
-	/**
-	 * @see org.newdawn.slick.BasicGame#update(org.newdawn.slick.GameContainer, int)
-	 */
-	public void update(GameContainer container, int delta) throws SlickException {
+	def update(container:GameContainer, delta:Int) {
 		// check the controls, left/right adjust the rotation of the tank, up/down 
 		// move backwards and forwards
 		if (container.getInput().isKeyDown(Input.KEY_LEFT)) {
-			ang -= delta * TANK_ROTATE_SPEED;
-			updateMovementVector();
+			ang -= delta * TankRotateSpeed
+			updateMovementVector()
 		}
 		if (container.getInput().isKeyDown(Input.KEY_RIGHT)) {
-			ang += delta * TANK_ROTATE_SPEED;
-			updateMovementVector();
+			ang += delta * TankRotateSpeed
+			updateMovementVector()
 		}
 		if (container.getInput().isKeyDown(Input.KEY_UP)) {
-			if (tryMove(dirX * delta * TANK_MOVE_SPEED, dirY * delta * TANK_MOVE_SPEED)) {
+			if (tryMove(dirX * delta * TankMoveSpeed, dirY * delta * TankMoveSpeed)) {
 				// if we managed to move update the animation
-				player.update(delta);
+				player.update(delta)
 			}
 		}
 		if (container.getInput().isKeyDown(Input.KEY_DOWN)) {
-			if (tryMove(-dirX * delta * TANK_MOVE_SPEED, -dirY * delta * TANK_MOVE_SPEED)) {
+			if (tryMove(-dirX * delta * TankMoveSpeed, -dirY * delta * TankMoveSpeed)) {
 				// if we managed to move update the animation
-				player.update(delta);
+				player.update(delta)
 			}
 		}
 	}
@@ -145,9 +135,7 @@ public class Scroller extends BasicGame {
 	 * @param y The y coordinate of the tank's location
 	 * @return True if the location is blocked
 	 */
-	private boolean blocked(float x, float y) {
-		return blocked[(int) x][(int) y];
-	}
+	def blocked(x:Float, y:Float) = blockedTiles(x.asInstanceOf[Int])(y.asInstanceOf[Int])
 	
 	/**
 	 * Try to move in the direction specified. If it's blocked, try sliding. If that
@@ -157,9 +145,9 @@ public class Scroller extends BasicGame {
 	 * @param y The amount on the Y axis to move
 	 * @return True if we managed to move
 	 */
-	private boolean tryMove(float x, float y) {
-		float newx = playerX + x;
-		float newy = playerY + y;
+	def tryMove(x:Float, y:Float) = {
+		val newx:Float = playerX + x
+		val newy:Float = playerY + y
 		
 		// first we try the real move, if that doesn't work
 		// we try moving on just one of the axis (X and then Y) 
@@ -168,19 +156,19 @@ public class Scroller extends BasicGame {
 			if (blocked(newx, playerY)) {
 				if (blocked(playerX, newy)) {
 					// can't move at all!
-					return false;
+					false
 				} else {
 					playerY = newy;
-					return true;
+					true
 				}
 			} else {
-				playerX = newx;
-				return true;
+				playerX = newx
+				true
 			}
 		} else {
 			playerX = newx;
 			playerY = newy;
-			return true;
+			true;
 		}
 	}
 	
@@ -188,41 +176,38 @@ public class Scroller extends BasicGame {
 	 * Update the direction that will be moved in based on the
 	 * current angle of rotation
 	 */
-	private void updateMovementVector() {
-		dirX = (float) Math.sin(Math.toRadians(ang));
-		dirY = (float) -Math.cos(Math.toRadians(ang));
+	def updateMovementVector() {
+		dirX = Math.sin(Math.toRadians(ang)).asInstanceOf[Float]
+		dirY = -Math.cos(Math.toRadians(ang)).asInstanceOf[Float]
 	}
 	
-	/**
-	 * @see org.newdawn.slick.Game#render(org.newdawn.slick.GameContainer, org.newdawn.slick.Graphics)
-	 */
-	public void render(GameContainer container, Graphics g) throws SlickException {
+	def render(container:GameContainer, g:Graphics) { 
 		// draw the appropriate section of the tilemap based on the centre (hence the -(TANK_SIZE/2)) of
 		// the player
-		int playerTileX = (int) playerX;
-		int playerTileY = (int) playerY;
+		val playerTileX = playerX.asInstanceOf[Int]
+		val playerTileY = playerY.asInstanceOf[Int]
 		
 		// caculate the offset of the player from the edge of the tile. As the player moves around this
 		// varies and this tells us how far to offset the tile based rendering to give the smooth
 		// motion of scrolling
-		int playerTileOffsetX = (int) ((playerTileX - playerX) * TILE_SIZE);
-		int playerTileOffsetY = (int) ((playerTileY - playerY) * TILE_SIZE);
+		val playerTileOffsetX = ((playerTileX - playerX) * TileSize).asInstanceOf[Int]
+		val playerTileOffsetY = ((playerTileY - playerY) * TileSize).asInstanceOf[Int]
 		
 		// render the section of the map that should be visible. Notice the -1 and +3 which renders
 		// a little extra map around the edge of the screen to cope with tiles scrolling on and off
 		// the screen
-		map.render(playerTileOffsetX - (TANK_SIZE / 2), playerTileOffsetY - (TANK_SIZE / 2), 
+		map.render(playerTileOffsetX - (TankSize / 2), playerTileOffsetY - (TankSize / 2), 
 				   playerTileX - leftOffsetInTiles - 1, 
 				   playerTileY - topOffsetInTiles - 1,
-				   widthInTiles + 3, heightInTiles + 3);
+				   widthInTiles + 3, heightInTiles + 3)
 		
 		// draw entities relative to the player that must appear in the centre of the screen
-		g.translate(400 - (int) (playerX * 32), 300 - (int) (playerY * 32));
+		g.translate(400 - (playerX * 32).asInstanceOf[Int], 300 - (playerY * 32).asInstanceOf[Int]);
 		
-		drawTank(g, playerX, playerY, ang);
+		drawTank(g, playerX, playerY, ang)
 		// draw other entities here if there were any
 		
-		g.resetTransform();
+		g.resetTransform()
 	}
 
 	/**
@@ -233,30 +218,28 @@ public class Scroller extends BasicGame {
 	 * @param ypos The y coordinate in tiles the tank is at
 	 * @param rot The rotation of the tank
 	 */
-	public void drawTank(Graphics g, float xpos, float ypos, float rot) {
+	def drawTank(g:Graphics, xpos:Float, ypos:Float, rot:Float) {
 		// work out the centre of the tank in rendering coordinates and then
 		// spit onto the screen
-		int cx = (int) (xpos * 32);
-		int cy = (int) (ypos * 32);
-		g.rotate(cx,cy,rot);
-		player.draw(cx-16,cy-16);
-		g.rotate(cx,cy,-rot);
+		val cx = (xpos * 32).asInstanceOf[Int]
+		val cy = (ypos * 32).asInstanceOf[Int]
+		g.rotate(cx,cy,rot)
+		player.draw(cx-16,cy-16)
+		g.rotate(cx,cy,-rot)
 	}
-	
+}
+
+object Scroller {	
 	/**
 	 * Entry point to the scroller example
 	 * 
 	 * @param argv The argument passed on the command line (if any)
 	 */
-	public static void main(String[] argv) {
-		try {
+	def main(argv:Array[String]) {
 			// create a new container for our example game. This container
 			// just creates a normal native window for rendering OpenGL accelerated
 			// elements to
-			AppGameContainer container = new AppGameContainer(new Scroller(), 800, 600, false);
-			container.start();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+			val container = new AppGameContainer(new Scroller(), 800, 600, false)
+			container.start()
+  }
 }

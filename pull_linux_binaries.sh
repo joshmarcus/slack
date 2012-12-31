@@ -1,6 +1,7 @@
-curl -o lwjgl2.8.5.zip https://nodeload.github.com/LWJGL/lwjgl/zip/lwjgl2.8.5
-unzip lwjgl2.8.5.zip
+curl -o lwjgl-2.9.0.zip "http://www.newdawnsoftware.com/jenkins/view/LWJGL/job/LWJGL/lastSuccessfulBuild/artifact/dist/lwjgl-2.9.0.zip"
+unzip -o lwjgl-2.9.0.zip
 mkdir -p lib
-cp -ar lwjgl-lwjgl2.8.5/libs/linux/* lib
-rm -rf  lwjgl-lwjgl2.8.5
-rm lwjgl2.8.5.zip
+cp -a lwjgl-2.9.0/jar/*  lib
+cp -a lwjgl-2.9.0/native/linux/*  lib
+#rm -rf  lwjgl-2.9.0
+#rm lwjgl-2.9.0.zip

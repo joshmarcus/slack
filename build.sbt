@@ -7,7 +7,9 @@ resolvers ++= Seq ( "Slick2D Maven Repo" at "http://slick.cokeandcode.com/mavenr
 
 libraryDependencies += "org.lwjgl.lwjgl" % "lwjgl" % "2.8.5"
 
-libraryDependencies += "org.lwjgl.lwjgl" % "lwjgl-platform" % "2.8.5" classifier "natives-windows" classifier "natives-linux" classifier "natives-osx"
+//libraryDependencies += "org.lwjgl.lwjgl" % "lwjgl-platform" % "2.8.5" classifier "natives-windows" classifier "natives-linux" classifier "natives-osx"
+
+libraryDependencies += "org.lwjgl.lwjgl" % "lwjgl-platform" % "2.8.5" classifier "natives-linux"
 
 libraryDependencies += "slick" % "slick" % "274" exclude ("org.lwjgl","lwjgl") exclude ("phys2d","phys2d")
 

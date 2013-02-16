@@ -3,15 +3,14 @@ Slack
 
 "Slack is the end result of all quests of a carnal or spiritual nature." -- Philo's Historie (The SubGenius Psychlopaedia of Slack)
 
-Slack is a 2D game library written in scala, intended to be a scala port of Slick2D that provides 
-functional reactive programming tools for game programming.  
+Slack is a 2D game library written in scala, intended to provide functional reactive programming tools for game 
+programming and wrap Slick2D.
 
-The project has included the source from scala.React, which isn't "production quality" but is interesting.
+I began by exploring scala.React, although I've now given up on that project for now -- and am now exploring [Elm](http://elm-lang.org)
+as a model.
 
 Important: There are two scripts for downloading the necessary native libraries for Linux and OSX.
 
 At the moment, there is an initial ReactiveGame which implements Slick's BasicGame and a runnable test
-that is primarily for initial experiments with scala.React and Slick.
-
-My next goal is to port over the Scrollable demo to Scala, and then to use components from ReactiveGame,
-and then port over the Slick libraries it's using.
+that is primarily for initial experiments with scala.React and Slick. Slick's Scrollable demo has been ported to Scala,
+but not with a functional approach.
